@@ -25,6 +25,7 @@ import pwmio
 from adafruit_motor import servo
 import time
 import ulab.numpy as np
+from adafruit_servokit import ServoKit
 
 class gonk:
     def __init__(self):
@@ -76,23 +77,21 @@ class gonk:
             print("No mpu6050 detected")
             self.mpu=0
         #setup servos
-        pins=[board.GP17,board.GP20,board.GP21,board.GP22]
-        self.servos=[servo.Servo(pwmio.PWMOut(pins[i], frequency=50),min_pulse=750, max_pulse=2250) for i in range(len(pins))]
+        try:
+            self.servos = ServoKit(channels=16,i2c=self.i2c)
+        except Exception as e:
+            print("No servo controller", e)
+            self.servos=0
         #setup feet
-        self.LF=[digitalio.DigitalInOut(board.GP2),digitalio.DigitalInOut(board.GP3),digitalio.DigitalInOut(board.GP4),digitalio.DigitalInOut(board.GP5)]
+        self.LF=[digitalio.DigitalInOut(board.GP4),digitalio.DigitalInOut(board.GP5),digitalio.DigitalInOut(board.GP2),digitalio.DigitalInOut(board.GP3)] #0 amd 1 -> 4 5
         for i in range(len(self.LF)): #set mode
             self.LF[i].direction = digitalio.Direction.OUTPUT
-        self.RF=[digitalio.DigitalInOut(board.GP8),digitalio.DigitalInOut(board.GP9),digitalio.DigitalInOut(board.GP14),digitalio.DigitalInOut(board.GP16)]
+        self.RF=[digitalio.DigitalInOut(board.GP8),digitalio.DigitalInOut(board.GP9),digitalio.DigitalInOut(board.GP13),digitalio.DigitalInOut(board.GP14)] #10 11 -> 13 14
         for i in range(len(self.RF)): #set mode
             self.RF[i].direction = digitalio.Direction.OUTPUT
-        self.Lpin = analogio.AnalogIn(board.GP27)
+        self.Lpin = analogio.AnalogIn(board.GP28)
         self.Rpin = analogio.AnalogIn(board.GP26)
-        self.openPinL=digitalio.DigitalInOut(board.GP7)
-        self.openPinR=digitalio.DigitalInOut(board.GP6)
-        self.openPinL.direction = digitalio.Direction.OUTPUT
-        self.openPinR.direction = digitalio.Direction.OUTPUT
-        self.openPinL.value=0
-        self.openPinR.value=0
+        
         #bandpass filter
         self.LP=self.getFeet()
         self.HP=self.getFeet()
@@ -102,8 +101,8 @@ class gonk:
         reset all motors
         """
         angles=[100,50,170,100]
-        for i in range(len(self.servos)):
-            self.servos[i].angle=angles[i]
+        for i in range(len(self.servos.servo)):
+            self.servos.servo[i].angle=angles[i]
     def move(self,servo,angle,step=2):
         """
         move the servo in a slower way
@@ -111,16 +110,9 @@ class gonk:
         @param angle
         @param step (step size to move) larger step means quicker motor
         """
-        assert servo>=0 and servo<len(self.servos),"Incorrect index"
-        if angle<self.servos[servo].angle:
-            for i in reversed(range(angle,int(self.servos[servo].angle),step)):
-                self.servos[servo].angle-=step
-                time.sleep(0.01)
-        else:
-            for i in range(int(self.servos[servo].angle),angle,step):
-                self.servos[servo].angle+=step
-                time.sleep(0.01)
-        self.servos[servo].angle=angle
+        if type(self.servos)!=type(0):
+            assert servo>=0 and servo<5,"Incorrect index"
+            self.servos.servo[servo].angle=angle
     def getFeet(self,ignore=[]): #get the readings from both feet
         def select_channel(channel,foot): #select a channel
             channel=f'{channel:04b}'
