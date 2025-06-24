@@ -101,7 +101,7 @@ class gonk:
         reset all motors
         """
         angles=[100,50,170,100]
-        for i in range(len(self.servos.servo)):
+        for i in range(4):
             self.servos.servo[i].angle=angles[i]
     def move(self,servo,angle,step=2):
         """
@@ -145,8 +145,8 @@ class gonk:
         @param servo is the index of the servo
         @param angle is the angle to move to
         """
-        assert servo>=0 and servo<len(self.servos),"Incorrect index"
-        self.servos[servo].angle=angle
+        assert servo>=0 and servo<len(self.servos.servo),"Incorrect index"
+        self.servos.servo[servo].angle=angle
     def display_face(self,motion):
         #display the eye
         if self.eyes:
