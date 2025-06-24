@@ -23,7 +23,7 @@ class sinBot:
             L=self.leg_geno[0]*np.sin(self.leg_geno[1]*self.t - self.phase[i]) + self.leg_geno[2]
             motor_positions.append([H,L])
         self.t+=self.dt
-        return np.array(motor_positions).flatten()
+        return np.array(motor_positions).T.flatten()
     def mutate(self,rate=0.2):
         probailities=np.array([random.randrange(0,100)/100 for i in range(self.geno.shape[0])])
         indices = [i for i in range(len(probailities)) if probailities < rate]
@@ -58,4 +58,7 @@ if __name__=="__main__":
     print(a.step(0,0))
     a.mutate()
     a.sex(a,a)
+    demo_geno=np.array([ 2.72625783, -0.17485828, -0.644057,    0.55858815,  0.76411699,
+                         0.06190889, -0.77529542,  0.16388109, -5.18609128, 4.86663314])
+    a.set_genotype(demo_geno)
 
