@@ -89,8 +89,8 @@ class gonk:
         self.RF=[digitalio.DigitalInOut(board.GP8),digitalio.DigitalInOut(board.GP9),digitalio.DigitalInOut(board.GP13),digitalio.DigitalInOut(board.GP14)] #10 11 -> 13 14
         for i in range(len(self.RF)): #set mode
             self.RF[i].direction = digitalio.Direction.OUTPUT
-        self.Lpin = analogio.AnalogIn(board.GP28)
-        self.Rpin = analogio.AnalogIn(board.GP26)
+        self.Lpin = analogio.AnalogIn(board.GP26)
+        self.Rpin = analogio.AnalogIn(board.GP27)
         
         #bandpass filter
         self.LP=self.getFeet()
@@ -100,7 +100,7 @@ class gonk:
         """
         reset all motors
         """
-        angles=[100,50,170,100]
+        angles=[50,50,75,180]
         for i in range(4):
             self.servos.servo[i].angle=angles[i]
     def move(self,servo,angle,step=2):
@@ -244,7 +244,3 @@ class gonk:
             for j in range(len(keys)-1):
                 f.write(keys[j]+",")
             f.write(keys[-1]+"\n")
-
-
-
-

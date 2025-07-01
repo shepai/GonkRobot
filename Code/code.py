@@ -29,6 +29,7 @@ demo_geno=np.array([-0.04198164,  0.90918552, -4.65281121, -2.22457433, -0.22812
 bot.set_genotype(demo_geno)
 for i in range(1000):
     motors=bot.get_positions(0)*50
+    time.sleep(0.1)
     if i%300==0: droid.blink()
     print(motors)
     droid.move(0,motors[0])
@@ -36,3 +37,7 @@ for i in range(1000):
     droid.move(2,motors[2])
     droid.move(3,motors[3])
     time.sleep(0.5)
+
+for i in range(1000):
+    print(droid.getFeet())
+    time.sleep(0.1)
