@@ -96,13 +96,22 @@ class gonk:
         self.LP=self.getFeet()
         self.HP=self.getFeet()
         self.time=time.monotonic()
+        self.sim=[0,0,0,0]
     def reset(self):
         """
         reset all motors
         """
+        self.OG=[50,50,75,180]
         angles=[50,50,75,180]
         for i in range(4):
             self.servos.servo[i].angle=angles[i]
+    def move_simulated_angle(self,servo,angle,step=2):
+        if self.OG[servo]+angle>180: angle=180
+        elif self.OG[servo]+angle<0: angle=0
+        angle=self.OG[servo]+angle
+        if type(self.servos)!=type(0):
+            assert servo>=0 and servo<5,"Incorrect index"
+            self.servos.servo[servo].angle=angle
     def move(self,servo,angle,step=2):
         """
         move the servo in a slower way
@@ -244,3 +253,7 @@ class gonk:
             for j in range(len(keys)-1):
                 f.write(keys[j]+",")
             f.write(keys[-1]+"\n")
+
+
+
+
