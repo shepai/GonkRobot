@@ -106,7 +106,7 @@ class gonk:
         for i in range(4):
             self.servos.servo[i].angle=angles[i]
     def move_simulated_angle(self,servo,angle,step=2):
-        if self.OG[servo]+angle>180: angle=180
+        if self.OG[servo]+angle>180: angle=180-self.OG[servo]
         elif self.OG[servo]+angle<0: angle=0
         angle=self.OG[servo]+angle
         if type(self.servos)!=type(0):
