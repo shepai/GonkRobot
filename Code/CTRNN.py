@@ -2,8 +2,8 @@ import ulab.numpy as np
 from CPML import *
 
 
-class CTRNNQuadruped:
-    def __init__(self, num_legs=4, num_motors_per_leg=3, dt=0.1,imu=False):
+class CTRNN:
+    def __init__(self, num_legs=2, num_motors_per_leg=2, dt=0.1,imu=False):
         self.num_legs = num_legs
         self.num_motors = num_legs * num_motors_per_leg  # 12 motors total
         self.dt = dt  # Time step for integration
@@ -28,13 +28,13 @@ class CTRNNQuadruped:
     def sigmoid(self, x):
         x = np.clip(x, -500, 500)
         return 1 / (1 + np.exp(-x))
-    def get_positions(self,inputs,motors=None):
-        degrees=np.degrees(self.step(imu_feedback=inputs, velocity_feedback=0))/1.5
+    def get_positions(self):
+        degrees=np.degrees(self.step())/1.5
         degrees=np.clip(degrees,0,180)
-        degrees[[2,5,8,11]]=degrees[[1,4,7,10]]
-        degrees[3:9]=-degrees[3:9] #try running this 
+        #degrees[[2,5,8,11]]=degrees[[1,4,7,10]]
+        #degrees[3:9]=-degrees[3:9] #try running this 
         return degrees
-    def step(self, imu_feedback):
+    def step(self):
         """Update the CTRNN for one timestep."""
         #imu_feedback = np.array(imu_feedback).flatten()
         # Create fixed input weights if not already done (move this to __init__ ideally)
@@ -57,10 +57,11 @@ class CTRNNQuadruped:
         oscillation = np.sin(self.phases)
 
         # Compute motor commands (combine CTRNn output and oscillation)
-        motor_commands = np.concatenate((self.outputs[0:3],self.outputs[0:3],self.outputs[0:3],self.outputs[0:3])) + 0.5 * oscillation
+        motor_commands = np.concatenate((self.outputs[0:2],self.outputs[0:2])) + 0.5 * oscillation
         return np.clip(motor_commands, 0, 1)*self.height  # Return motor positions (normalized)
     def set_genotype(self, values):
         """Set CTRNN parameters from an evolutionary genotype."""
+        values=np.array(values).flatten()
         num_weights = len(self.weights.flatten())
         num_biases = len(self.biases.flatten())
         num_tau = len(self.tau.flatten())
@@ -75,7 +76,7 @@ class CTRNNQuadruped:
         self.tau = np.maximum(self.tau, self.dt)  # Ensure time constants are above dt
         self.weights = np.clip(self.weights, -4, 4)  # Cap weight values
         self.omega = np.clip(self.omega, -1, 1)  # Cap weight values
-        self.geno=np.concatenate([self.weights.flatten(),self.biases.flatten(),self.tau.flatten(),self.omega.flatten()])
+        self.geno=np.concatenate((self.weights.flatten(),self.biases.flatten(),self.tau.flatten(),self.omega.flatten()))
     def mutate(self,rate=0.2):
         probailities=np.random.random(self.geno.shape)
         self.geno[np.where(probailities<rate)]+=np.random.normal(0,4,self.geno[np.where(probailities<rate)].shape)
@@ -87,6 +88,7 @@ class CTRNNQuadruped:
         return geno2
     
 if __name__=="__main__":
-    ctrnn=CTRNNQuadruped()
+    ctrnn=CTRNN()
+    ctrnn.set_genotype([-4.0, -1.979483127303821, -2.6134730072425976, 0.6353006073539745, -0.5767297012777883, 1.6916845661774853, -1.3080843652309686, -4.0, -4.0, 3.0022133998998752, -4.0, -2.031404790190659, -1.8429813520162543, -1.3567392947051444, 3.199609455068915, -4.0, -4.0, 2.821240881010276, 0.3581688571696764, -1.250495478072581, 0.04951595382405394, -1.1191723652952783, -0.05525765747875799, -4.0, -4.0, -0.25197927441904955, 1.4057323191010203, 4.0, -4.0, -0.8624821406348135, 0.9322368168651997, -1.1024799968913193, -0.4214269247000231, -4.0, 1.499969483134101, -3.634234240891784, -8.024940243651704, -4.265873117468551, -0.13069005653599064, -9.768744835064052, 2.793021541392865, -0.20210841082502592, 0.5, 0.1, 0.1, 6.633111424143629, 0.5, 2.2014231270150293, -1.0, 0.10179440779752791, 1.0, 1.0])
     for i in range(1000):
-        print(ctrnn.step(0))
+        print(ctrnn.step())
