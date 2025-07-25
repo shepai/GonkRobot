@@ -11,8 +11,8 @@ class sinBot:
         self.geno=np.concatenate((self.hip_geno,self.leg_geno,self.phase))
         self.t=0
     def get_positions(self,inputs,motors=None):
-        degrees=np.degrees(self.step(imu_feedback=inputs, velocity_feedback=0))*20
-        degrees=np.clip(degrees,0,60)
+        degrees=np.degrees(self.step(imu_feedback=inputs, velocity_feedback=0))*10
+        degrees=np.clip(degrees,0,40)
         #degrees[[2,5,8,11]]=degrees[[1,4,7,10]]
         #degrees[3:9]=-degrees[3:9] #try running this 
         return degrees
