@@ -101,8 +101,8 @@ class gonk:
         """
         reset all motors
         """
-        self.OG=[50,50,75,180]
-        angles=[50,50,75,180]
+        self.OG=[20,50,50,50]
+        angles=[20,50,50,50]
         for i in range(4):
             self.servos.servo[i].angle=angles[i]
     def move_simulated_angle(self,servo,angle,step=2):
@@ -112,6 +112,7 @@ class gonk:
         if type(self.servos)!=type(0):
             assert servo>=0 and servo<5,"Incorrect index"
             self.servos.servo[servo].angle=angle
+            self.sim[servo]=self.servos.servo[servo].angle
     def move(self,servo,angle,step=2):
         """
         move the servo in a slower way
@@ -156,6 +157,7 @@ class gonk:
         """
         assert servo>=0 and servo<len(self.servos.servo),"Incorrect index"
         self.servos.servo[servo].angle=angle
+        self.sim[servo]=self.servos.servo[servo].angle
     def display_face(self,motion):
         #display the eye
         if self.eyes:
@@ -199,7 +201,7 @@ class gonk:
                     self.display[j, i] = 0
                     self.display[j,3]=1
                     self.display[j,4]=1
-            time.sleep(0.1)
+            time.sleep(0.05)
             self.display_face(self.eye)
     def getGyro(self,mode=1):
         """
